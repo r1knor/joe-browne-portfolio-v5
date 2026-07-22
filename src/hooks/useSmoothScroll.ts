@@ -18,6 +18,10 @@ export function useSmoothScroll(disabled: boolean, onScroll?: (scroll: number) =
     const lenis = new Lenis({ lerp: 0.085, smoothWheel: true, syncTouch: false });
     const update = (time: number) => lenis.raf(time * 1000);
 
+    if (document.body.classList.contains('hero-intro-locked')) {
+      lenis.stop();
+    }
+
     lenis.on('scroll', ({ scroll }) => {
       ScrollTrigger.update();
       onScrollRef.current?.(scroll);
@@ -34,9 +38,22 @@ export function useSmoothScroll(disabled: boolean, onScroll?: (scroll: number) =
       lenis.scrollTo(target as HTMLElement, { duration: 1.15, offset: 0 });
     };
 
+    const handleIntroRelease = () => {
+      const target = document.querySelector<HTMLElement>('#work');
+      if (!target) return;
+      lenis.start();
+      lenis.scrollTo(target, {
+        duration: 1.75,
+        offset: 0,
+        easing: (time) => 1 - Math.pow(1 - time, 5),
+      });
+    };
+
     document.addEventListener('click', handleAnchor);
+    window.addEventListener('hero-intro-release', handleIntroRelease);
     return () => {
       document.removeEventListener('click', handleAnchor);
+      window.removeEventListener('hero-intro-release', handleIntroRelease);
       gsap.ticker.remove(update);
       lenis.destroy();
     };
