@@ -1,54 +1,69 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AnimatedTitle } from '../components/AnimatedTitle';
 import { site } from '../data/site';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
-function shouldPlayHeroIntro() {
-  return (
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
-    window.scrollY < 4 &&
-    !window.location.hash &&
-    sessionStorage.getItem('hero-intro-seen') !== 'true'
-  );
-}
+gsap.registerPlugin(ScrollTrigger);
 
 export function Hero() {
+  const reduced = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [introPlaying, setIntroPlaying] = useState(shouldPlayHeroIntro);
-
-  const releaseIntro = useCallback((shouldContinue = true) => {
-    document.body.classList.remove('hero-intro-locked');
-    videoRef.current?.pause();
-    setIntroPlaying(false);
-    sessionStorage.setItem('hero-intro-seen', 'true');
-
-    if (shouldContinue) {
-      window.setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('hero-intro-release'));
-      }, 260);
-    }
-  }, []);
+  const progressRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (!introPlaying) return;
+    if (reduced) return;
 
-    document.body.classList.add('hero-intro-locked');
+    const section = sectionRef.current;
+    const video = videoRef.current;
+    const progress = progressRef.current;
+    if (!section || !video || !progress) return;
 
-    const safetyRelease = window.setTimeout(() => releaseIntro(false), 9000);
-    const play = videoRef.current?.play();
-    play?.catch(() => releaseIntro(false));
+    let tween: gsap.core.Tween | undefined;
+
+    const createSequence = () => {
+      video.pause();
+      video.currentTime = 0.001;
+      gsap.set(progress, { scaleX: 0 });
+
+      tween = gsap.to(video, {
+        currentTime: Math.max(0.01, video.duration - 1 / 24),
+        filter: 'grayscale(1) saturate(0.4) contrast(1.12) brightness(0.64)',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${Math.max(window.innerHeight * 2.4, 1800)}`,
+          pin: true,
+          scrub: 0.18,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: ({ progress: scrollProgress }) => {
+            gsap.set(progress, { scaleX: scrollProgress });
+          },
+        },
+      });
+
+      ScrollTrigger.refresh();
+    };
+
+    if (video.readyState >= 1) {
+      createSequence();
+    } else {
+      video.addEventListener('loadedmetadata', createSequence, { once: true });
+    }
 
     return () => {
-      window.clearTimeout(safetyRelease);
-      document.body.classList.remove('hero-intro-locked');
+      video.removeEventListener('loadedmetadata', createSequence);
+      tween?.scrollTrigger?.kill();
+      tween?.kill();
     };
-  }, [introPlaying, releaseIntro]);
+  }, [reduced]);
 
   return (
-    <section
-      id="about"
-      className={`hero${introPlaying ? ' hero--intro-playing' : ' hero--intro-complete'}`}
-      data-section="about"
-    >
+    <section ref={sectionRef} id="about" className="hero" data-section="about">
       <div className="hero__stage">
         <div className="hero__meta" aria-label="Portfolio introduction">
           <span>{site.location}</span>
@@ -82,12 +97,12 @@ export function Hero() {
             height="960"
             muted
             playsInline
-            autoPlay={introPlaying}
             preload="auto"
             aria-hidden="true"
-            onEnded={() => releaseIntro(introPlaying)}
-            onError={() => releaseIntro(false)}
           />
+          <div className="hero__scrub-meter" aria-hidden="true">
+            <span ref={progressRef} />
+          </div>
         </figure>
 
         <nav className="hero__routes" aria-label="Featured portfolio routes">
@@ -96,9 +111,13 @@ export function Hero() {
           <a href="#contact">Contact</a>
         </nav>
 
-        <a className="hero__scroll" href="#work" aria-label="Continue to selected work">
+        <a
+          className="hero__scroll"
+          href="#work"
+          aria-label="Skip the video and continue to selected work"
+        >
           <span aria-hidden="true" />
-          Scroll
+          Scroll to play
         </a>
       </div>
     </section>

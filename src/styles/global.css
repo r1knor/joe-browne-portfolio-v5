@@ -2620,79 +2620,37 @@ img { display: block; max-width: 100%; }
   }
 }
 
-/* Cinematic hero video handoff */
-body.hero-intro-locked {
-  height: 100svh;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-body.hero-intro-locked .index-rail,
-body.hero-intro-locked .hero a {
-  pointer-events: none;
-}
-
+/* Scroll-scrubbed hero film */
 .hero__portrait video {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
   object-position: 53% center;
-  filter: grayscale(1) saturate(0.4) contrast(1.12) brightness(0.64);
-  transform: none;
-  transition:
-    filter 800ms var(--ease-out),
-    transform 1200ms var(--ease-out);
-}
-
-.hero--intro-playing .hero__portrait video {
   filter: grayscale(0.2) saturate(0.8) contrast(1.08) brightness(0.72);
   transform: scale(1.012);
+  will-change: filter;
 }
 
-.hero--intro-playing .hero__scroll,
-.hero--intro-playing .hero__routes {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.hero__scroll,
-.hero__routes {
-  transition: opacity 650ms var(--ease-out);
-}
-
-.hero__portrait::before {
-  content: '';
+.hero__scrub-meter {
   position: absolute;
-  z-index: 2;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    color-mix(in oklch, var(--coral) 26%, transparent) 50%,
-    transparent 100%
-  );
-  opacity: 0;
-  transform: translateY(-100%);
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in oklch, var(--ink) 12%, transparent);
 }
 
-.hero--intro-complete .hero__portrait::before {
-  animation: hero-signal-release 900ms var(--ease-out) both;
-}
-
-@keyframes hero-signal-release {
-  0% {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-  32% {
-    opacity: 0.32;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(100%);
-  }
+.hero__scrub-meter span {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: var(--coral);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
 }
 
 @media (max-width: 760px) {
@@ -2702,10 +2660,12 @@ body.hero-intro-locked .hero a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__portrait::before {
-    display: none !important;
+  .hero__scrub-meter {
+    display: none;
   }
+
   .hero__portrait video {
-    transform: none !important;
+    filter: grayscale(1) saturate(0.4) contrast(1.12) brightness(0.64);
+    transform: none;
   }
 }
