@@ -1,0 +1,9 @@
+node_modules
+dist
+.codex-preview
+.vercel
+.learnings
+audit
+*.log
+.env*
+src/assets/originals/.DS_Store
