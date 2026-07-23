@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { SectionFrame } from '../components/SectionFrame';
 
 type Release = {
@@ -87,52 +88,94 @@ const releases: readonly Release[] = [
 
 const playerUrl = ({ resource, resourceId }: Release) => {
   const source = encodeURIComponent('https://api.soundcloud.com/' + resource + '/' + resourceId);
-  return 'https://w.soundcloud.com/player/?url=' + source + '&color=%23ef554c&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
+  return 'https://w.soundcloud.com/player/?url=' + source + '&color=%23ef554c&auto_play=true&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false';
 };
 
 export function Music() {
+  const [active, setActive] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const shown = hovered ?? active ?? 0;
+
   return (
-    <SectionFrame id="music" number="05" title="Music Production Career" className="music">
-      <ol className="music__release-grid" aria-label="Selected music productions">
-        {releases.map((release, index) => (
-          <li className="music__release" key={release.externalUrl}>
-            <figure className="music__release-disc">
-              <img
-                src={release.artwork}
-                alt={release.title + ' cover artwork'}
-                width="500"
-                height="500"
-                loading="lazy"
-              />
-              <span aria-hidden="true" />
-            </figure>
+    <SectionFrame id="music" number="05" title="Riknor, on record." className="music">
+      <div className="music__intro" data-reveal>
+        <p>
+          A decade producing grime and dark garage as Riknor—cut for radio, pressed for labels and
+          played out on big systems.
+        </p>
+        <ul className="music__credits" aria-label="Music credentials">
+          <li>BBC 1Xtra</li>
+          <li>Rinse FM</li>
+          <li>O2 Arena</li>
+          <li>10+ years</li>
+        </ul>
+      </div>
 
-            <div className="music__release-body">
-              <div className="music__release-meta">
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                <span>{release.artist}</span>
-                <a href={release.externalUrl} target="_blank" rel="noreferrer" aria-label={'Open ' + release.title + ' on SoundCloud'}>
-                  SC ↗
-                </a>
-              </div>
-              <h3>{release.title}</h3>
-              <p>{release.detail}</p>
-              <iframe
-                title={release.artist + ' — ' + release.title + ' on SoundCloud'}
-                src={playerUrl(release)}
-                width="100%"
-                height="112"
-                loading="lazy"
-                allow="autoplay; encrypted-media"
-              />
-            </div>
-          </li>
-        ))}
-      </ol>
+      <div className="music__deck">
+        <ol className="music__index" aria-label="Selected music productions">
+          {releases.map((release, index) => (
+            <li
+              key={release.externalUrl}
+              className={active === index ? 'is-active' : undefined}
+              onPointerEnter={() => setHovered(index)}
+              onPointerLeave={() => setHovered(null)}
+            >
+              <button
+                type="button"
+                onClick={() => setActive(active === index ? null : index)}
+                aria-expanded={active === index}
+                aria-label={
+                  (active === index ? 'Stop ' : 'Play ') + release.title + ' by ' + release.artist
+                }
+              >
+                <span className="music__no" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="music__titles">
+                  <strong>{release.title}</strong>
+                  <em>{release.artist}</em>
+                </span>
+                <span className="music__detail">{release.detail}</span>
+                <span className="music__play" aria-hidden="true">
+                  {active === index ? 'Stop' : 'Play'}
+                </span>
+              </button>
+              {active === index && (
+                <div className="music__player-row">
+                  <iframe
+                    title={release.artist + ' — ' + release.title + ' on SoundCloud'}
+                    src={playerUrl(release)}
+                    width="100%"
+                    height="112"
+                    allow="autoplay; encrypted-media"
+                  />
+                  <a href={release.externalUrl} target="_blank" rel="noreferrer">
+                    Open on SoundCloud ↗
+                  </a>
+                </div>
+              )}
+            </li>
+          ))}
+        </ol>
 
-      <ul className="music__credits" aria-label="Music credentials from the source portfolio">
-        <li>BBC 1Xtra</li><li>Rinse FM</li><li>O2 Arena</li><li>10+ years</li>
-      </ul>
+        <figure className="music__stage" aria-hidden="true">
+          {releases.map((release, index) => (
+            <img
+              key={release.externalUrl}
+              src={release.artwork}
+              alt=""
+              width="500"
+              height="500"
+              loading="lazy"
+              className={index === shown ? 'is-shown' : undefined}
+            />
+          ))}
+          <figcaption>
+            <span>{String(shown + 1).padStart(2, '0')}</span>
+            <span>{releases[shown].title}</span>
+          </figcaption>
+        </figure>
+      </div>
     </SectionFrame>
   );
 }

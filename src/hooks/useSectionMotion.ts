@@ -42,6 +42,20 @@ export function useSectionMotion(disabled: boolean) {
         );
       });
 
+      document.querySelectorAll<HTMLElement>('.section-frame__ghost, .portfolio__index').forEach((ghost) => {
+        const section = ghost.closest('section');
+        if (!section) return;
+        gsap.fromTo(
+          ghost,
+          { yPercent: -12 },
+          {
+            yPercent: 12,
+            ease: 'none',
+            scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: true },
+          },
+        );
+      });
+
       const portfolio = document.querySelector<HTMLElement>('[data-portfolio]');
       const portfolioPin = document.querySelector<HTMLElement>('[data-portfolio-pin]');
       if (portfolio && portfolioPin && window.matchMedia('(min-width: 961px)').matches) {
@@ -64,16 +78,15 @@ export function useSectionMotion(disabled: boolean) {
           scrollTrigger: {
             trigger: stage,
             start: 'top 92%',
-            end: 'bottom 8%',
+            end: 'top 38%',
             scrub: 0.75,
           },
         })
           .fromTo(
             media,
-            { scale: 0.84, opacity: 0.28, clipPath: 'inset(9% 9% 9% 9%)' },
-            { scale: 1, opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: 0.46, ease: 'none' },
-          )
-          .to(media, { scale: 0.95, opacity: 0.24, duration: 0.32, ease: 'none' }, 0.68);
+            { scale: 0.84, clipPath: 'inset(9% 9% 9% 9%)' },
+            { scale: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: 0.46, ease: 'none' },
+          );
 
         if (link && cursor && window.matchMedia('(hover: hover)').matches) {
           gsap.set(cursor, { xPercent: -50, yPercent: -50, scale: 0.68, opacity: 0 });
