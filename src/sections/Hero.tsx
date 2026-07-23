@@ -40,12 +40,17 @@ export function Hero() {
           scrub: 0.18,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          // This pin is created after the section triggers (it waits on video
+          // metadata); without re-sorting, triggers below the hero compute
+          // their start positions ignoring the pin's added scroll distance.
+          refreshPriority: 1,
           onUpdate: ({ progress: scrollProgress }) => {
             gsap.set(progress, { scaleX: scrollProgress });
           },
         },
       });
 
+      ScrollTrigger.sort();
       ScrollTrigger.refresh();
     };
 
@@ -80,8 +85,8 @@ export function Hero() {
             01
           </span>
           <p className="hero__intro">
-            I build identities, interfaces and production artwork designed to survive the real
-            world.
+            I build identities, interfaces and production artwork{' '}
+            <em>designed to survive the real world.</em>
           </p>
           <a className="hero__contact" href="#work">
             View selected work <span aria-hidden="true">↘</span>

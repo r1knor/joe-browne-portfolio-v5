@@ -98,7 +98,11 @@ export function Music() {
 
   return (
     <SectionFrame id="music" number="05" title="Riknor, on record." className="music">
-      <div className="music__intro" data-reveal>
+      <div className="music__atmos" aria-hidden="true">
+        <span className="music__atmos-rings" />
+        <span className="music__atmos-dash" />
+      </div>
+      <div className="music__intro">
         <p>
           A decade producing grime and dark garage as Riknor—cut for radio, pressed for labels and
           played out on big systems.
@@ -137,6 +141,13 @@ export function Music() {
                 </span>
                 <span className="music__detail">{release.detail}</span>
                 <span className="music__play" aria-hidden="true">
+                  {active === index && (
+                    <span className="music__eq">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  )}
                   {active === index ? 'Stop' : 'Play'}
                 </span>
               </button>

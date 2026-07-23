@@ -26,16 +26,18 @@ export function Navigation({ activeSection, progress }: Props) {
     <>
       <aside className="index-rail" aria-label="Portfolio sections">
         <a href="#about" className="index-rail__brand" aria-label="Joe Browne, back to top">
-          JB
+          <strong>Joe Browne</strong>
+          <span>Design / Production</span>
         </a>
         <nav className="index-rail__nav">
-          {navigation.map((item) => (
+          {navigation.map((item, index) => (
             <a
               key={item.id}
               href={'#' + item.id}
               className={activeSection === item.id ? 'is-active' : undefined}
               aria-current={activeSection === item.id ? 'location' : undefined}
             >
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
               {item.label}
             </a>
           ))}
@@ -43,12 +45,20 @@ export function Navigation({ activeSection, progress }: Props) {
         <div className="index-rail__meter" aria-hidden="true">
           <span style={{ transform: `scaleY(${progress})` }} />
         </div>
-        <span className="index-rail__place">SALFORD / 53.48°N</span>
+        <div className="index-rail__foot">
+          <span className="index-rail__count" aria-hidden="true">
+            {String(
+              Math.max(1, navigation.findIndex((item) => item.id === activeSection) + 1),
+            ).padStart(2, '0')}
+            <em>/ {String(navigation.length).padStart(2, '0')}</em>
+          </span>
+          <span className="index-rail__place">SALFORD / 53.48°N</span>
+        </div>
       </aside>
 
       <header className="mobile-bar">
         <a href="#about" className="mobile-bar__brand">
-          JB
+          Joe Browne
         </a>
         <span>{navigation.find((item) => item.id === activeSection)?.label ?? 'About'}</span>
         <button ref={triggerRef} type="button" onClick={() => setOpen(true)} aria-haspopup="dialog">

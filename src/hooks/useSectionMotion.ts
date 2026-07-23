@@ -9,9 +9,12 @@ export function useSectionMotion(disabled: boolean) {
     if (disabled) return;
 
     const cleanups: Array<() => void> = [];
+    const isDesktop = window.matchMedia('(min-width: 961px)').matches;
+
     const context = gsap.context(() => {
+      // Generic once-reveals; intros and heads get richer scrub treatments below.
       document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => {
-        if (element.matches('.section-frame__head')) return;
+        if (element.matches('.section-frame__head, .skills__lead, .portfolio__intro, .music__intro')) return;
         gsap.fromTo(
           element,
           { y: 28, clipPath: 'inset(0 0 14% 0)' },
@@ -25,23 +28,59 @@ export function useSectionMotion(disabled: boolean) {
         );
       });
 
+      // Section titles: hero plays on load; the rest scrub in word by word.
       document.querySelectorAll<HTMLElement>('[data-section-title]').forEach((title) => {
         const words = title.querySelectorAll<HTMLElement>('.section-title__word > span');
+        if (title.closest('.hero')) {
+          gsap.fromTo(
+            words,
+            { yPercent: 112, opacity: 0.12, filter: 'blur(8px)' },
+            {
+              yPercent: 0,
+              opacity: 1,
+              filter: 'blur(0px)',
+              duration: 0.92,
+              stagger: 0.07,
+              ease: 'expo.out',
+              delay: 0.15,
+            },
+          );
+          return;
+        }
         gsap.fromTo(
           words,
-          { yPercent: 112, opacity: 0.12, filter: 'blur(8px)' },
+          { yPercent: 112, opacity: 0.1, filter: 'blur(6px)' },
           {
             yPercent: 0,
             opacity: 1,
             filter: 'blur(0px)',
-            duration: 0.92,
-            stagger: 0.07,
-            ease: 'expo.out',
-            scrollTrigger: { trigger: title, start: 'top 88%', once: true },
+            stagger: 0.08,
+            ease: 'none',
+            scrollTrigger: { trigger: title, start: 'top 92%', end: 'top 45%', scrub: 0.6 },
           },
         );
       });
 
+      // Section intros: rise + unclip tied to scroll, both directions.
+      document
+        .querySelectorAll<HTMLElement>(
+          '.skills__lead, .portfolio__intro, [data-timeline-intro], .music__intro > p',
+        )
+        .forEach((intro) => {
+          gsap.fromTo(
+            intro,
+            { opacity: 0.06, y: 44, clipPath: 'inset(0 0 100% 0)' },
+            {
+              opacity: 1,
+              y: 0,
+              clipPath: 'inset(0 0 0% 0)',
+              ease: 'none',
+              scrollTrigger: { trigger: intro, start: 'top 88%', end: 'top 48%', scrub: 0.7 },
+            },
+          );
+        });
+
+      // Ghost numerals drift with each section's scroll range.
       document.querySelectorAll<HTMLElement>('.section-frame__ghost, .portfolio__index').forEach((ghost) => {
         const section = ghost.closest('section');
         if (!section) return;
@@ -56,37 +95,68 @@ export function useSectionMotion(disabled: boolean) {
         );
       });
 
+      // Work: pinned horizontal showcase on desktop, vertical reveals on mobile.
       const portfolio = document.querySelector<HTMLElement>('[data-portfolio]');
-      const portfolioPin = document.querySelector<HTMLElement>('[data-portfolio-pin]');
-      if (portfolio && portfolioPin && window.matchMedia('(min-width: 961px)').matches) {
-        ScrollTrigger.create({
-          trigger: portfolio,
-          start: 'top top',
-          end: 'bottom bottom',
-          pin: portfolioPin,
-          pinSpacing: false,
+      const sequence = portfolio?.querySelector<HTMLElement>('.portfolio__sequence') ?? null;
+      const stages = gsap.utils.toArray<HTMLElement>('[data-project-stage]');
+      let horizontal: gsap.core.Tween | undefined;
+
+      if (portfolio && sequence && isDesktop) {
+        const distance = () => Math.max(0, sequence.scrollWidth - window.innerWidth);
+        horizontal = gsap.to(sequence, {
+          x: () => -distance(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: portfolio,
+            start: 'top top',
+            end: () => '+=' + distance(),
+            pin: true,
+            scrub: 0.6,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
         });
       }
 
-      document.querySelectorAll<HTMLElement>('[data-project-stage]').forEach((stage) => {
+      stages.forEach((stage) => {
         const media = stage.querySelector<HTMLElement>('[data-project-media]');
         const link = media?.querySelector<HTMLElement>('a');
         const cursor = media?.querySelector<HTMLElement>('.project-stage__cursor');
         if (!media) return;
 
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: stage,
-            start: 'top 92%',
-            end: 'top 38%',
-            scrub: 0.75,
-          },
-        })
-          .fromTo(
+        if (horizontal) {
+          gsap.fromTo(
             media,
-            { scale: 0.84, clipPath: 'inset(9% 9% 9% 9%)' },
-            { scale: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: 0.46, ease: 'none' },
+            { scale: 0.9, opacity: 0.45, clipPath: 'inset(6% 6% 6% 6%)' },
+            {
+              scale: 1,
+              opacity: 1,
+              clipPath: 'inset(0% 0% 0% 0%)',
+              ease: 'none',
+              scrollTrigger: {
+                trigger: stage,
+                containerAnimation: horizontal,
+                start: 'left 100%',
+                end: 'left 52%',
+                scrub: true,
+              },
+            },
           );
+        } else {
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: stage,
+              start: 'top 92%',
+              end: 'top 38%',
+              scrub: 0.75,
+            },
+          })
+            .fromTo(
+              media,
+              { scale: 0.84, clipPath: 'inset(9% 9% 9% 9%)' },
+              { scale: 1, clipPath: 'inset(0% 0% 0% 0%)', duration: 0.46, ease: 'none' },
+            );
+        }
 
         if (link && cursor && window.matchMedia('(hover: hover)').matches) {
           gsap.set(cursor, { xPercent: -50, yPercent: -50, scale: 0.68, opacity: 0 });
@@ -112,30 +182,7 @@ export function useSectionMotion(disabled: boolean) {
         }
       });
 
-      const timelineSection = document.querySelector<HTMLElement>('.timeline');
-
-      const timelineIntro = document.querySelector<HTMLElement>('[data-timeline-intro]');
       const timelineRoles = gsap.utils.toArray<HTMLElement>('[data-timeline-role]');
-
-      if (timelineSection && timelineIntro) {
-        gsap.fromTo(
-          timelineIntro,
-          { opacity: 0.08, y: 42, clipPath: 'inset(0 0 100% 0)' },
-          {
-            opacity: 1,
-            y: 0,
-            clipPath: 'inset(0 0 0% 0)',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: timelineSection,
-              start: 'top 62%',
-              end: 'top 18%',
-              scrub: 0.7,
-            },
-          },
-        );
-      }
-
       timelineRoles.forEach((role, index) => {
         gsap.fromTo(
           role,
