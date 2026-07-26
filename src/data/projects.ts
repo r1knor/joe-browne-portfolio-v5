@@ -109,6 +109,45 @@ export const projects: Project[] = [
     orientation: 'landscape',
   },
   {
+    slug: 'combat-sports-thumbnails',
+    title: 'Combat Sports Thumbnails',
+    summary: 'Fight stories distilled into bold, immediate click-worthy frames.',
+    description: 'A thumbnail series for boxing, kickboxing and MMA content, balancing athlete recognition, event stakes and high-impact editorial hierarchy.',
+    categories: ['Thumbnail design', 'Combat sports', 'YouTube'],
+    role: 'Thumbnail design',
+    deliverables: ['YouTube thumbnails', 'Sports content artwork'],
+    coverImage: image('fight-thumbnails-alex-pereira-01', 'Alex Pereira fighter of the year video thumbnail', 1672, 941, 720, 1200),
+    galleryImages: [
+      image('fight-thumbnails-alex-pereira-02', 'Alternative Alex Pereira fighter of the year video thumbnail', 1672, 941, 720, 1200),
+      image('fight-thumbnails-bivol-beterbiev-01', 'Dmitry Bivol versus Artur Beterbiev video thumbnail', 1280, 720, 720, 1200),
+      image('fight-thumbnails-bivol-beterbiev-02', 'Dmitry Bivol versus Artur Beterbiev editorial thumbnail', 1672, 941, 720, 1200),
+      image('fight-thumbnails-bivol-beterbiev-03', 'Dmitry Bivol versus Artur Beterbiev rematch thumbnail', 1672, 941, 720, 1200),
+      image('fight-thumbnails-bivol-beterbiev-04', 'Dmitry Bivol versus Artur Beterbiev fight thumbnail', 1672, 941, 720, 1200),
+      image('fight-thumbnails-superbon-highlights', 'Superbon fight highlights video thumbnail', 1672, 941, 720, 1200),
+    ],
+    featured: true,
+    orientation: 'landscape',
+  },
+  {
+    slug: 'gaming-thumbnails',
+    title: 'Gaming Thumbnails',
+    summary: 'Gaming moments packaged for feeds, long-form video and vertical shorts.',
+    description: 'A flexible thumbnail set for FC 26 and Fortnite content, designed across landscape video covers and mobile-first vertical formats.',
+    categories: ['Thumbnail design', 'Gaming', 'Social'],
+    role: 'Thumbnail design',
+    deliverables: ['Video thumbnails', 'Vertical short covers'],
+    coverImage: image('gaming-thumbnails-fc26-01', 'FC 26 gaming video thumbnail', 1672, 941, 720, 1200),
+    galleryImages: [
+      image('gaming-thumbnails-fc26-02', 'Alternative FC 26 gaming video thumbnail', 1672, 941, 720, 1200),
+      image('gaming-thumbnails-fc26-03', 'FC 26 football gaming thumbnail', 1672, 941, 720, 1200),
+      image('gaming-thumbnails-fortnite-shorts-01', 'Fortnite vertical short cover', 941, 1672, 720, 941),
+      image('gaming-thumbnails-fortnite-shorts-02', 'Alternative Fortnite vertical short cover', 941, 1672, 720, 941),
+      image('gaming-thumbnails-fortnite-shorts-03', 'Fortnite mobile short cover', 941, 1672, 720, 941),
+    ],
+    featured: true,
+    orientation: 'landscape',
+  },
+  {
     slug: 'strictly-dubs-futurecurse',
     title: 'Strictly Dubs × Future Curse',
     summary: 'Tracklists, cover systems and release graphics built as one bass-heavy visual campaign.',
@@ -126,6 +165,7 @@ export const projects: Project[] = [
     ],
     featured: true,
     orientation: 'portrait',
-  },];
+  },
+];
 
 export const getProject = (slug?: string) => projects.find((project) => project.slug === slug);
