@@ -179,13 +179,15 @@ export function useSectionMotion(disabled: boolean) {
           velocity = 0;
           startScroll = window.scrollY;
           sequence.classList.add('is-grabbing');
-          sequence.setPointerCapture(event.pointerId);
         };
 
         const onMove = (event: PointerEvent) => {
           if (!dragging) return;
           const dx = event.clientX - startX;
-          if (Math.abs(dx) > 5) didDrag = true;
+          if (Math.abs(dx) > 5 && !didDrag) {
+            didDrag = true;
+            sequence.setPointerCapture(event.pointerId);
+          }
           window.scrollTo(0, gsap.utils.clamp(trigger.start, trigger.end, startScroll - dx));
           const now = performance.now();
           const dt = now - lastTime;
