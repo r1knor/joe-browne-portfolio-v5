@@ -2899,6 +2899,14 @@ img { display: block; max-width: 100%; }
     margin: 0;
     padding-inline: var(--content-x) clamp(6rem, 10vw, 10rem);
     will-change: transform;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  .portfolio__sequence.is-grabbing,
+  .portfolio__sequence.is-grabbing .project-stage__media a {
+    cursor: grabbing;
   }
 
   .project-stage,
@@ -3037,4 +3045,117 @@ img { display: block; max-width: 100%; }
 .contact__form label,
 .site-footer {
   letter-spacing: 0.14em;
+}
+
+/* Interaction polish: stable touch targets, intentional hover, and mobile-safe motion. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  min-block-size: 2.75rem;
+}
+
+button,
+a[href] {
+  touch-action: manipulation;
+}
+
+.index-rail__nav a,
+.mobile-bar__brand,
+.mobile-bar button,
+.mobile-menu button,
+.contact__links a,
+.site-footer a {
+  min-block-size: 2.75rem;
+}
+
+.mobile-bar > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-stage__media > a {
+  outline-offset: -3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .index-rail__nav a:hover,
+  .mobile-bar button:hover,
+  .mobile-menu button:hover,
+  .contact__links a:hover,
+  .site-footer a:hover {
+    color: var(--coral);
+  }
+}
+
+@media (max-width: 760px) {
+  .mobile-bar {
+    min-height: calc(3.75rem + env(safe-area-inset-top));
+    padding: calc(0.5rem + env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) 0.5rem
+      max(1rem, env(safe-area-inset-left));
+  }
+
+  .mobile-bar button {
+    min-width: 3.5rem;
+  }
+
+  .project-detail__bar {
+    padding-block: 0.4rem;
+  }
+
+  .project-detail__bar a {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .mobile-menu[open] {
+    padding: calc(1.1rem + env(safe-area-inset-top)) max(1.1rem, env(safe-area-inset-right))
+      calc(1.1rem + env(safe-area-inset-bottom)) max(1.1rem, env(safe-area-inset-left));
+    animation: menu-enter 420ms var(--ease-out) both;
+  }
+
+  .mobile-menu nav a {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    min-height: 3.5rem;
+    align-items: center;
+  }
+
+  .mobile-menu nav a span {
+    display: inline-block;
+  }
+
+  .hero__portrait video {
+    background: url('/assets/images/joe-browne-portrait-1400.webp') 44% center / cover no-repeat;
+  }
+
+  .project-stage {
+    will-change: auto;
+  }
+
+  .project-stage__media > a {
+    min-height: clamp(20rem, 112vw, 28rem);
+  }
+}
+
+@keyframes menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu[open] {
+    animation: none;
+  }
 }

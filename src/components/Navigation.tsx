@@ -17,6 +17,15 @@ export function Navigation({ activeSection, progress }: Props) {
     return () => document.body.classList.remove('menu-open');
   }, [open]);
 
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 761px)');
+    const handleDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setOpen(false);
+    };
+    desktop.addEventListener('change', handleDesktop);
+    return () => desktop.removeEventListener('change', handleDesktop);
+  }, []);
+
   const close = () => {
     setOpen(false);
     window.setTimeout(() => triggerRef.current?.focus(), 0);
@@ -61,12 +70,26 @@ export function Navigation({ activeSection, progress }: Props) {
           Joe Browne
         </a>
         <span>{navigation.find((item) => item.id === activeSection)?.label ?? 'About'}</span>
-        <button ref={triggerRef} type="button" onClick={() => setOpen(true)} aria-haspopup="dialog">
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls="mobile-section-menu"
+          aria-label="Open section menu"
+        >
           Index
         </button>
       </header>
 
-      <dialog ref={dialogRef} className="mobile-menu" onClose={() => setOpen(false)}>
+      <dialog
+        ref={dialogRef}
+        id="mobile-section-menu"
+        className="mobile-menu"
+        aria-label="Portfolio sections"
+        onClose={() => setOpen(false)}
+      >
         <div className="mobile-menu__top">
           <span>Joe Browne / index</span>
           <button type="button" onClick={close} aria-label="Close section menu">
@@ -74,7 +97,7 @@ export function Navigation({ activeSection, progress }: Props) {
           </button>
         </div>
         <nav>
-          {navigation.map((item) => (
+          {navigation.map((item, index) => (
             <a
               key={item.id}
               href={'#' + item.id}
@@ -82,6 +105,7 @@ export function Navigation({ activeSection, progress }: Props) {
               aria-current={activeSection === item.id ? 'location' : undefined}
               onClick={close}
             >
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
               {item.label}
             </a>
           ))}

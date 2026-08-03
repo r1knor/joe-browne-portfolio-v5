@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AnimatedTitle } from '../components/AnimatedTitle';
@@ -9,12 +9,23 @@ gsap.registerPlugin(ScrollTrigger);
 
 export function Hero() {
   const reduced = useReducedMotion();
+  const [compactMotion, setCompactMotion] = useState(
+    () => window.matchMedia('(max-width: 760px), (pointer: coarse)').matches,
+  );
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (reduced) return;
+    const media = window.matchMedia('(max-width: 760px), (pointer: coarse)');
+    const update = () => setCompactMotion(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (reduced || compactMotion) return;
 
     const section = sectionRef.current;
     const video = videoRef.current;
@@ -65,7 +76,7 @@ export function Hero() {
       tween?.scrollTrigger?.kill();
       tween?.kill();
     };
-  }, [reduced]);
+  }, [compactMotion, reduced]);
 
   return (
     <section ref={sectionRef} id="about" className="hero" data-section="about">
@@ -102,7 +113,7 @@ export function Hero() {
             height="960"
             muted
             playsInline
-            preload="auto"
+            preload={compactMotion || reduced ? 'none' : 'metadata'}
             aria-hidden="true"
           />
           <div className="hero__scrub-meter" aria-hidden="true">
